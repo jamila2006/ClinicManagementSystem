@@ -1,0 +1,56 @@
+﻿using ClinicManagementSystem.DTOs;
+using ClinicManagementSystem.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ClinicManagementSystem.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DepartmentsController : ControllerBase
+    {
+        private readonly IDepartmentService _service;
+
+        public DepartmentsController(IDepartmentService service)
+        {
+            _service = service;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<DepartmentDto>>> GetAll()
+        {
+            var departments = await _service.GetAllAsync();
+            return Ok(departments);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DepartmentDto>> GetById(int id)
+        {
+            var department = await _service.GetByIdAsync(id);
+            if (department == null) return NotFound();
+            return Ok(department);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<DepartmentDto>> Create(CreateDepartmentDto dto)
+        {
+            var created = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, CreateDepartmentDto dto)
+        {
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+    }
+}
