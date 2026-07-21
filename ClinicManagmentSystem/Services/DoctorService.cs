@@ -47,9 +47,10 @@ namespace ClinicManagementSystem.Services
             return await _repository.SaveChangesAsync();
         }
 
-        public async Task<List<DoctorDTO>> GetAllAsync()
+        public async Task<List<DoctorDTO>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            var doctors = await _repository.GetAllAsync();
+            var doctors = await _repository.GetAllAsync(pageNumber, pageSize, sortBy);
+       
             return doctors.Select(d=> new DoctorDTO
             {
                 Id = d.Id,

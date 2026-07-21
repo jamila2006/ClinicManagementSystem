@@ -23,10 +23,19 @@ namespace ClinicManagementSystem.Repositories
             _context.Doctors.Remove(doctor);
         }
 
-        public async Task<List<Doctor>> GetAllAsync()
+        public async Task<List<Doctor>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            return await _context.Doctors
-                .Include(d => d.Department)
+            var query = _context.Doctors.Include(d => d.Department).AsQueryable();
+            query = sortBy?.ToLower() switch
+            {
+                "firstname" => query.OrderBy(d => d.FirstName),
+                "lastname" => query.OrderBy(d => d.LastName),
+                "experienceyears" => query.OrderBy(d => d.ExperienceYears),
+                _ => query.OrderBy(d => d.Id)
+            };
+            return await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 

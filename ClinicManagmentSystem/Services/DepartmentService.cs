@@ -13,9 +13,9 @@ namespace ClinicManagementSystem.Services
             _repository = repository;
         }
 
-        public async Task<List<DepartmentDto>> GetAllAsync()
+        public async Task<List<DepartmentDto>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            var departments = await _repository.GetAllAsync();
+            var departments = await _repository.GetAllAsync(pageNumber, pageSize, sortBy);
 
             return departments.Select(d => new DepartmentDto
             {

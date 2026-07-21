@@ -13,9 +13,21 @@ namespace ClinicManagementSystem.Repositories
             _context = context;
         }
 
-        public async Task<List<Patient>> GetAllAsync()
+        public async Task<List<Patient>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            return await _context.Patients.ToListAsync();
+            var query = _context.Patients.AsQueryable();
+
+            query = sortBy?.ToLower() switch
+            {
+                "firstname" => query.OrderBy(p => p.FirstName),
+                "lastname" => query.OrderBy(p => p.LastName),
+                _ => query.OrderBy(p => p.Id)
+            };
+
+            return await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<Patient?> GetByIdAsync(int id)

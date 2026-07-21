@@ -16,9 +16,15 @@ namespace ClinicManagementSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PatientDto>>> GetAll()
+        public async Task<ActionResult<List<PatientDto>>> GetAll(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? sortBy = null)
         {
-            var patients = await _service.GetAllAsync();
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var patients = await _service.GetAllAsync(pageNumber, pageSize, sortBy);
             return Ok(patients);
         }
 

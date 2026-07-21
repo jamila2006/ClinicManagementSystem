@@ -13,11 +13,24 @@ namespace ClinicManagementSystem.Repositories
             _context = context;
         }
 
-        public async Task<List<Appointment>> GetAllAsync()
+        public async Task<List<Appointment>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            return await _context.Appointments
+            var query = _context.Appointments
                 .Include(a => a.Doctor)
                 .Include(a => a.Patient)
+                .AsQueryable();
+
+            query = sortBy?.ToLower() switch
+            {
+                "date" => query.OrderBy(a => a.AppointmentDate),
+                "date_desc" => query.OrderByDescending(a => a.AppointmentDate),
+                "status" => query.OrderBy(a => a.Status),
+                _ => query.OrderBy(a => a.Id)
+            };
+
+            return await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 

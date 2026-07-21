@@ -4,7 +4,7 @@ namespace ClinicManagementSystem.Repositories
 {
     public interface IAppointmentRepository
     {
-        Task<List<Appointment>> GetAllAsync();
+        Task<List<Appointment>> GetAllAsync(int pageNumber, int pageSize, string? sortBy);
         Task<Appointment?> GetByIdAsync(int id);
         Task AddAsync(Appointment appointment);
         void Update(Appointment appointment);
