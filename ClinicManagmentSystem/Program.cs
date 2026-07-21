@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Repositories;
 using ClinicManagementSystem.Services;
+using ClinicManagementSystem.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,7 @@ builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 var app = builder.Build();
-
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 
