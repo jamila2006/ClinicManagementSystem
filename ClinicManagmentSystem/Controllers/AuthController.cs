@@ -16,16 +16,20 @@ namespace ClinicManagementSystem.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
 
         public AuthController(
-            UserManager<AppUser> userManager,
-            ITokenService tokenService,
-            AppDbContext context)
+    UserManager<AppUser> userManager,
+    ITokenService tokenService,
+    AppDbContext context,
+    IConfiguration configuration)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _context = context;
+            _configuration = configuration;
         }
+       
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
@@ -88,5 +92,31 @@ namespace ClinicManagementSystem.Controllers
             return Ok(new { message = "Qeydiyyat uğurludur." });
         
     }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Email və ya şifrə yanlışdır." });
+            }
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
+            if (!passwordValid)
+            {
+                return Unauthorized(new { message = "Email və ya şifrə yanlışdır." });
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _tokenService.CreateToken(user, roles);
+
+            var expiresInMinutes = double.Parse(_configuration["Jwt:ExpiresInMinutes"]!);
+
+            return Ok(new AuthResponseDto
+            {
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(expiresInMinutes)
+            });
+        }
     }
 }
