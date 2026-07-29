@@ -1,9 +1,11 @@
 ﻿using ClinicManagementSystem.DTOs;
 using ClinicManagementSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClinicManagementSystem.Controllers
 {
+    [Authorize(Roles = "ADMIN,DOCTOR,PATIENT")]
     [ApiController]
     [Route("api/[controller]")]
     public class PatientsController : ControllerBase

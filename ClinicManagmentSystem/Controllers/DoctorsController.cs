@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ClinicManagementSystem.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "ADMIN,DOCTOR")]
     [ApiController]
     [Route("api/[controller]")]
     public class DoctorsController : ControllerBase
