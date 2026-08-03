@@ -57,7 +57,7 @@ namespace ClinicManagementSystem.Services
             };
         }
 
-        public async Task<bool> UpdateAsync(int id, CreateDepartmentDto dto)
+        public async Task<bool> UpdateAsync(int id, UpdateDepartmentDto dto)
         {
             var department = await _repository.GetByIdAsync(id);
             if (department == null) return false;

@@ -2,7 +2,6 @@
 using ClinicManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace ClinicManagementSystem.Controllers
 {
@@ -73,7 +72,7 @@ namespace ClinicManagementSystem.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, CreateDoctorDTO dto)
+        public async Task<IActionResult> Update(int id, UpdateDoctorDto dto)
         {
             var success = await _service.UpdateAsync(id, dto);
             if (!success) return NotFound();

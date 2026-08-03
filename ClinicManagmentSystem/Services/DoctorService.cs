@@ -82,7 +82,7 @@ namespace ClinicManagementSystem.Services
             };
         }
 
-        public async Task<bool> UpdateAsync(int id, CreateDoctorDTO dto)
+        public async Task<bool> UpdateAsync(int id, UpdateDoctorDto dto)
         {
             var doctor =await _repository.GetByIdAsync(id);
             if (doctor==null) return false;

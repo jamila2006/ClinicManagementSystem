@@ -72,7 +72,7 @@ namespace ClinicManagementSystem.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, CreatePatientDto dto)
+        public async Task<IActionResult> Update(int id, UpdatePatientDto dto)
         {
             var success = await _service.UpdateAsync(id, dto);
             if (!success) return NotFound();
