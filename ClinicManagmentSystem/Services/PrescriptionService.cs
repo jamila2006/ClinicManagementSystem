@@ -10,16 +10,24 @@ namespace ClinicManagementSystem.Services
     {
         private readonly IPrescriptionRepository _repository;
         private readonly AppDbContext _context;
+        private readonly ICacheService _cacheService;
 
-        public PrescriptionService(IPrescriptionRepository repository, AppDbContext context)
+        public PrescriptionService(IPrescriptionRepository repository, AppDbContext context, ICacheService cacheService)
         {
             _repository = repository;
             _context = context;
+            _cacheService = cacheService;
         }
 
         public async Task<PrescriptionDto?> GetByIdAsync(int id)
         {
-            var prescription = await _repository.GetByIdWithDetailsAsync(id);
+            var cacheKey = $"prescription:{id}";
+
+            var prescription = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetByIdWithDetailsAsync(id)
+            );
+
             return prescription == null ? null : ToDto(prescription);
         }
 
