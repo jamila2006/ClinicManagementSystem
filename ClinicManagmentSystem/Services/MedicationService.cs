@@ -7,17 +7,32 @@ namespace ClinicManagementSystem.Services
     public class MedicationService : IMedicationService
     {
         private readonly IMedicationRepository _repository;
-        public MedicationService(IMedicationRepository repository) => _repository = repository;
+        private readonly ICacheService _cacheService;
+
+        public MedicationService(IMedicationRepository repository, ICacheService cacheService)
+        {
+            _repository = repository;
+            _cacheService = cacheService;
+        }
 
         public async Task<List<MedicationDto>> GetAllAsync()
         {
-            var meds = await _repository.GetAllAsync();
+            var meds = await _cacheService.GetOrCreateAsync(
+                "medications:all",
+                async () => await _repository.GetAllAsync()
+            );
             return meds.Select(ToDto).ToList();
         }
 
         public async Task<MedicationDto?> GetByIdAsync(int id)
         {
-            var med = await _repository.GetByIdAsync(id);
+            var cacheKey = $"medication:{id}";
+
+            var med = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetByIdAsync(id)
+            );
+
             return med == null ? null : ToDto(med);
         }
 
@@ -54,6 +69,7 @@ namespace ClinicManagementSystem.Services
 
         public Task<bool> DeleteAsync(int id) => _repository.DeleteAsync(id);
 
+        // GetLowStockAsync BİLƏRƏKDƏN keşlənmir — izahı aşağıda
         public async Task<List<MedicationDto>> GetLowStockAsync(int threshold)
         {
             var meds = await _repository.GetLowStockAsync(threshold);
