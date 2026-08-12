@@ -2,15 +2,18 @@
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Repositories;
 
+
 namespace ClinicManagementSystem.Services
 {
     public class DoctorService : IDoctorService
     {
         private readonly IDoctorRepository _repository;
+        private readonly ICacheService _cacheService;
 
-        public DoctorService(IDoctorRepository repository)
+        public DoctorService(IDoctorRepository repository, ICacheService cacheService)
         {
             _repository = repository;
+            _cacheService = cacheService;
         }
 
         public async Task<DoctorDTO> CreateAsync(CreateDoctorDTO dto)
@@ -47,11 +50,16 @@ namespace ClinicManagementSystem.Services
             return await _repository.SaveChangesAsync();
         }
 
-        public async Task<List<DoctorDTO>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
+        public async Task<List<DoctorDTO>> GetAllAsync(int pageNumber, int pageSize, string sortBy)
         {
-            var doctors = await _repository.GetAllAsync(pageNumber, pageSize, sortBy);
-       
-            return doctors.Select(d=> new DoctorDTO
+            var cacheKey = $"doctors:all:page{pageNumber}:size{pageSize}:sort{sortBy}";
+
+            var doctors = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetAllAsync(pageNumber, pageSize, sortBy)
+            );
+
+            return doctors.Select(d => new DoctorDTO
             {
                 Id = d.Id,
                 FirstName = d.FirstName,
@@ -60,7 +68,7 @@ namespace ClinicManagementSystem.Services
                 PhoneNumber = d.PhoneNumber,
                 ExperienceYears = d.ExperienceYears,
                 DepartmentId = d.DepartmentId,
-                DepartmentName=d.Department?.Name
+                DepartmentName = d.Department?.Name
             }).ToList();
         }
 
