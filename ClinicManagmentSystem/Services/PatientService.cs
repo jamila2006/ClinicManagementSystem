@@ -1,16 +1,19 @@
 ﻿using ClinicManagementSystem.DTOs;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Repositories;
+using ClinicManagementSystem.Services.Implementations;
 
 namespace ClinicManagementSystem.Services
 {
     public class PatientService : IPatientService
     {
         private readonly IPatientRepository _repository;
+        private readonly ICacheService _cacheService;   // <- BU SƏTIR ƏLAVƏ OLUNMALIDIR
 
-        public PatientService(IPatientRepository repository)
+        public PatientService(IPatientRepository repository, ICacheService cacheService)  // <- İKİNCİ PARAMETR ƏLAVƏ OLUNMALIDIR
         {
             _repository = repository;
+            _cacheService = cacheService;   // <- BU SƏTIR ƏLAVƏ OLUNMALIDIR
         }
 
         public async Task<List<PatientDto>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
@@ -31,7 +34,13 @@ namespace ClinicManagementSystem.Services
 
         public async Task<PatientDto?> GetByIdAsync(int id)
         {
-            var p = await _repository.GetByIdAsync(id);
+            var cacheKey = $"patient:{id}";
+
+            var p = await _cacheService.GetOrCreateAsync(   
+                cacheKey,
+                async () => await _repository.GetByIdAsync(id)  
+            );
+
             if (p == null) return null;
 
             return new PatientDto
