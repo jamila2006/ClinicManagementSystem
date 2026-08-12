@@ -18,7 +18,12 @@ namespace ClinicManagementSystem.Services
 
         public async Task<List<PatientDto>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            var patients = await _repository.GetAllAsync(pageNumber, pageSize, sortBy);
+            var cacheKey = $"patients:all:page{pageNumber}:size{pageSize}:sort{sortBy}";
+
+            var patients = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetAllAsync(pageNumber, pageSize, sortBy)
+            );
 
             return patients.Select(p => new PatientDto
             {
