@@ -3,11 +3,12 @@ using ClinicManagementSystem.Middleware;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Repositories;
 using ClinicManagementSystem.Services;
+using ClinicManagementSystem.Services.Implementations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
@@ -93,6 +95,7 @@ builder.Services.AddScoped<IMedicationService, MedicationService>();
 
 builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<ICacheService, CacheService>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
