@@ -7,15 +7,21 @@ namespace ClinicManagementSystem.Services
     public class DepartmentService : IDepartmentService
     {
         private readonly IDepartmentRepository _repository;
-
-        public DepartmentService(IDepartmentRepository repository)
+        private readonly ICacheService _cacheService;
+        public DepartmentService(IDepartmentRepository repository, ICacheService cacheService)
         {
             _repository = repository;
+            _cacheService = cacheService;
         }
 
         public async Task<List<DepartmentDto>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            var departments = await _repository.GetAllAsync(pageNumber, pageSize, sortBy);
+            var cacheKey = $"departments:all:page{pageNumber}:size{pageSize}:sort{sortBy}";
+
+            var departments = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetAllAsync(pageNumber, pageSize, sortBy)
+            );
 
             return departments.Select(d => new DepartmentDto
             {
@@ -27,7 +33,13 @@ namespace ClinicManagementSystem.Services
 
         public async Task<DepartmentDto?> GetByIdAsync(int id)
         {
-            var d = await _repository.GetByIdAsync(id);
+            var cacheKey = $"department:{id}";
+
+            var d = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetByIdAsync(id)
+            );
+
             if (d == null) return null;
 
             return new DepartmentDto
