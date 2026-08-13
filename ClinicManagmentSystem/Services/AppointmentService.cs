@@ -7,15 +7,24 @@ namespace ClinicManagementSystem.Services
     public class AppointmentService : IAppointmentService
     {
         private readonly IAppointmentRepository _repository;
+        private readonly ICacheService _cacheService;
+        private static readonly TimeSpan AppointmentCacheExpiration = TimeSpan.FromMinutes(1);
 
-        public AppointmentService(IAppointmentRepository repository)
+        public AppointmentService(IAppointmentRepository repository, ICacheService cacheService)
         {
             _repository = repository;
+            _cacheService = cacheService;
         }
 
         public async Task<List<AppointmentDto>> GetAllAsync(int pageNumber, int pageSize, string? sortBy)
         {
-            var appointments = await _repository.GetAllAsync(pageNumber, pageSize, sortBy);
+            var cacheKey = $"appointments:all:page{pageNumber}:size{pageSize}:sort{sortBy}";
+
+            var appointments = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetAllAsync(pageNumber, pageSize, sortBy),
+                AppointmentCacheExpiration
+            );
 
             return appointments.Select(a => new AppointmentDto
             {
@@ -32,7 +41,14 @@ namespace ClinicManagementSystem.Services
 
         public async Task<AppointmentDto?> GetByIdAsync(int id)
         {
-            var a = await _repository.GetByIdAsync(id);
+            var cacheKey = $"appointment:{id}";
+
+            var a = await _cacheService.GetOrCreateAsync(
+                cacheKey,
+                async () => await _repository.GetByIdAsync(id),
+                AppointmentCacheExpiration
+            );
+
             if (a == null) return null;
 
             return new AppointmentDto
