@@ -15,10 +15,8 @@ namespace ClinicManagementSystem.Services.Implementations
         {
             if (_cache.TryGetValue(cacheKey, out T cachedValue)) 
             {
-                Console.WriteLine($"[CACHE HIT] {cacheKey}");
                 return cachedValue;
             }
-            Console.WriteLine($"[CACHE MISS] {cacheKey} — DB-yə gedirik");
             var freshValue = await factory();
             _cache.Set(cacheKey, freshValue, expiration ?? DefaultExpiration);
             return freshValue;
