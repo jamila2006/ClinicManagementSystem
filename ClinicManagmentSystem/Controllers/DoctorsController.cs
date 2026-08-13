@@ -1,5 +1,7 @@
 ﻿using ClinicManagementSystem.DTOs;
+using ClinicManagementSystem.Repositories;
 using ClinicManagementSystem.Services;
+using ClinicManagementSystem.Services.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +13,13 @@ namespace ClinicManagementSystem.Controllers
     public class DoctorsController : ControllerBase
     {
         private readonly IDoctorService _service;
-        public DoctorsController(IDoctorService service)
+        private readonly IFileService _fileService;
+        private readonly IDoctorRepository _doctorRepository;
+        public DoctorsController(IDoctorService service, IFileService fileService,IDoctorRepository doctorRepository)
         {
             _service = service;
+            _fileService = fileService;
+            _doctorRepository = doctorRepository;
         }
 
         /// <summary>
@@ -91,6 +97,57 @@ namespace ClinicManagementSystem.Controllers
             var success = await _service.DeleteAsync(id);
             if (!success) return NotFound();
             return NoContent();
+        }
+        /// <summary>
+        /// Həkimin profil şəklini yükləyir (yalnız .jpg/.jpeg/.png, maksimum 2MB).
+        /// </summary>
+        /// <param name="id">Həkimin ID-si</param>
+        /// <param name="file">Yüklənəcək şəkil faylı</param>
+        [HttpPost("{id}/photo")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UploadPhoto(int id, IFormFile file)
+        {
+            var doctor = await _doctorRepository.GetByIdAsync(id);
+            if (doctor == null) return NotFound();
+
+            try
+            {
+                var savedFileName = await _fileService.SaveDoctorPhotoAsync(id, file);
+
+                // köhnə foto varsa sil
+                _fileService.DeleteDoctorPhotoAsync(doctor.PhotoUrl);
+
+                doctor.PhotoUrl = savedFileName;
+                _doctorRepository.Update(doctor);
+                await _doctorRepository.SaveChangesAsync();
+
+                return Ok(new { photoUrl = savedFileName });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Həkimin profil şəklini endirir.
+        /// </summary>
+        /// <param name="id">Həkimin ID-si</param>
+        [HttpGet("{id}/photo")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPhoto(int id)
+        {
+            var doctor = await _doctorRepository.GetByIdAsync(id);
+            if (doctor == null || string.IsNullOrEmpty(doctor.PhotoUrl))
+                return NotFound();
+
+            var result = await _fileService.GetDoctorPhotoAsync(doctor.PhotoUrl);
+            if (result == null) return NotFound();
+
+            return File(result.Value.Content, result.Value.ContentType, result.Value.FileName);
         }
     }
 }
