@@ -10,6 +10,7 @@ namespace ClinicManagementSystem.DTOs
         public string Email{ get; set; }
         public string PhoneNumber{ get; set; }
         public int ExperienceYears{ get; set; }
+        public string? PhotoUrl { get; set; }
         public int DepartmentId{ get; set; }
         public string DepartmentName{ get; set; }
     }
