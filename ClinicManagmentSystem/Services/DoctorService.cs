@@ -68,7 +68,8 @@ namespace ClinicManagementSystem.Services
                 PhoneNumber = d.PhoneNumber,
                 ExperienceYears = d.ExperienceYears,
                 DepartmentId = d.DepartmentId,
-                DepartmentName = d.Department?.Name
+                DepartmentName = d.Department?.Name,
+                PhotoUrl = d.PhotoUrl
             }).ToList();
         }
 
@@ -86,7 +87,8 @@ namespace ClinicManagementSystem.Services
                 PhoneNumber = d.PhoneNumber,
                 ExperienceYears = d.ExperienceYears,
                 DepartmentId = d.DepartmentId,
-                DepartmentName = d.Department?.Name
+                DepartmentName = d.Department?.Name,
+                PhotoUrl = d.PhotoUrl
             };
         }
 
