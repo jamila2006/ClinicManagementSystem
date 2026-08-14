@@ -22,6 +22,9 @@ namespace ClinicManagementSystem.Services.Implementations
             return freshValue;
         }
 
-        
+        public void Remove(string cacheKey)
+        {
+            _cache.Remove(cacheKey);
+        }
     }
 }
