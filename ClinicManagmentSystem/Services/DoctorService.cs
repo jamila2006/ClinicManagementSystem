@@ -42,13 +42,7 @@ namespace ClinicManagementSystem.Services
             };
         }
 
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var doctor = await _repository.GetByIdAsync(id);
-            if(doctor == null) return false;
-            _repository.Delete(doctor);
-            return await _repository.SaveChangesAsync();
-        }
+        
 
         public async Task<List<DoctorDTO>> GetAllAsync(int pageNumber, int pageSize, string sortBy)
         {
@@ -91,11 +85,10 @@ namespace ClinicManagementSystem.Services
                 PhotoUrl = d.PhotoUrl
             };
         }
-
         public async Task<bool> UpdateAsync(int id, UpdateDoctorDto dto)
         {
-            var doctor =await _repository.GetByIdAsync(id);
-            if (doctor==null) return false;
+            var doctor = await _repository.GetByIdAsync(id);
+            if (doctor == null) return false;
 
             doctor.FirstName = dto.FirstName;
             doctor.LastName = dto.LastName;
@@ -104,7 +97,28 @@ namespace ClinicManagementSystem.Services
             doctor.ExperienceYears = dto.ExperienceYears;
             doctor.DepartmentId = dto.DepartmentId;
             _repository.Update(doctor);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success)
+            {
+                _cacheService.Remove($"doctor:{id}");   // <- YENİ
+            }
+            return success;
         }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var doctor = await _repository.GetByIdAsync(id);
+            if (doctor == null) return false;
+            _repository.Delete(doctor);
+
+            var success = await _repository.SaveChangesAsync();
+            if (success)
+            {
+                _cacheService.Remove($"doctor:{id}");   // <- YENİ
+            }
+            return success;
+        }
+
     }
 }
