@@ -42,8 +42,12 @@ namespace ClinicManagementSystem.Services
             return ToDto(created);
         }
 
-        public Task<bool> DeleteAsync(int id) => _repository.DeleteAsync(id);
-
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var success = await _repository.DeleteAsync(id);
+            if (success) _cacheService.Remove($"specialty:{id}");
+            return success;
+        }
         private static SpecialtyDto ToDto(Specialty s) => new() { Id = s.Id, Name = s.Name };
     }
 }

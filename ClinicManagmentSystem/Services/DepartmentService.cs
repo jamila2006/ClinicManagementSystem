@@ -76,18 +76,22 @@ namespace ClinicManagementSystem.Services
 
             department.Name = dto.Name;
             department.Description = dto.Description;
-
             _repository.Update(department);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success) _cacheService.Remove($"department:{id}");
+            return success;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             var department = await _repository.GetByIdAsync(id);
             if (department == null) return false;
-
             _repository.Delete(department);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success) _cacheService.Remove($"department:{id}");
+            return success;
         }
     }
 }

@@ -98,18 +98,22 @@ namespace ClinicManagementSystem.Services
             patient.Gender = dto.Gender;
             patient.Email = dto.Email;
             patient.PhoneNumber = dto.PhoneNumber;
-
             _repository.Update(patient);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success) _cacheService.Remove($"patient:{id}");
+            return success;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             var patient = await _repository.GetByIdAsync(id);
             if (patient == null) return false;
-
             _repository.Delete(patient);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success) _cacheService.Remove($"patient:{id}");
+            return success;
         }
     }
 }

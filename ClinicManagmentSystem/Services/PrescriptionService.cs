@@ -83,12 +83,19 @@ namespace ClinicManagementSystem.Services
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                foreach (var itemDto in dto.Items)
+                {
+                    _cacheService.Remove($"medication:{itemDto.MedicationId}");
+                }
+
                 var result = await _repository.GetByIdWithDetailsAsync(prescription.Id);
+
                 _notificationQueue.Enqueue(new EmailNotification(
-    result!.Patient?.Email ?? "unknown@clinic.com",
-    "Yeni resept təyin edildi",
-    $"Hörmətli {result.Patient?.FirstName}, sizə yeni resept təyin olundu."
-));
+                    result!.Patient?.Email ?? "unknown@clinic.com",
+                    "Yeni resept təyin edildi",
+                    $"Hörmətli {result.Patient?.FirstName}, sizə yeni resept təyin olundu."
+                ));
+
                 return ToDto(result!);
             }
             catch

@@ -52,7 +52,7 @@ namespace ClinicManagementSystem.Services
             return ToDto(created);
         }
 
-        public Task<bool> UpdateAsync(int id, UpdateMedicationDto dto)
+        public async Task<bool> UpdateAsync(int id, UpdateMedicationDto dto)
         {
             var medication = new Medication
             {
@@ -64,12 +64,18 @@ namespace ClinicManagementSystem.Services
                 StockQuantity = dto.StockQuantity,
                 Price = dto.Price
             };
-            return _repository.UpdateAsync(id, medication);
+            var success = await _repository.UpdateAsync(id, medication);
+            if (success) _cacheService.Remove($"medication:{id}");
+            return success;
         }
 
-        public Task<bool> DeleteAsync(int id) => _repository.DeleteAsync(id);
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var success = await _repository.DeleteAsync(id);
+            if (success) _cacheService.Remove($"medication:{id}");
+            return success;
+        }
 
-        // GetLowStockAsync BİLƏRƏKDƏN keşlənmir — izahı aşağıda
         public async Task<List<MedicationDto>> GetLowStockAsync(int threshold)
         {
             var meds = await _repository.GetLowStockAsync(threshold);

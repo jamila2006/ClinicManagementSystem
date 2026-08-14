@@ -99,18 +99,22 @@ namespace ClinicManagementSystem.Services
             appointment.Notes = dto.Notes;
             appointment.DoctorId = dto.DoctorId;
             appointment.PatientId = dto.PatientId;
-
             _repository.Update(appointment);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success) _cacheService.Remove($"appointment:{id}");
+            return success;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             var appointment = await _repository.GetByIdAsync(id);
             if (appointment == null) return false;
-
             _repository.Delete(appointment);
-            return await _repository.SaveChangesAsync();
+
+            var success = await _repository.SaveChangesAsync();
+            if (success) _cacheService.Remove($"appointment:{id}");
+            return success;
         }
     }
 }
