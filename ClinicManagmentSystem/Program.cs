@@ -97,6 +97,7 @@ builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddHostedService<DoctorPhotoCleanupService>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
