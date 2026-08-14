@@ -11,12 +11,15 @@ namespace ClinicManagementSystem.Services
         private readonly IPrescriptionRepository _repository;
         private readonly AppDbContext _context;
         private readonly ICacheService _cacheService;
+        private readonly INotificationQueue _notificationQueue;
 
-        public PrescriptionService(IPrescriptionRepository repository, AppDbContext context, ICacheService cacheService)
+
+        public PrescriptionService(IPrescriptionRepository repository, AppDbContext context, ICacheService cacheService, INotificationQueue notificationQueue)
         {
             _repository = repository;
             _context = context;
             _cacheService = cacheService;
+            _notificationQueue = notificationQueue;
         }
 
         public async Task<PrescriptionDto?> GetByIdAsync(int id)
@@ -81,6 +84,11 @@ namespace ClinicManagementSystem.Services
                 await transaction.CommitAsync();
 
                 var result = await _repository.GetByIdWithDetailsAsync(prescription.Id);
+                _notificationQueue.Enqueue(new EmailNotification(
+    result!.Patient?.Email ?? "unknown@clinic.com",
+    "Yeni resept təyin edildi",
+    $"Hörmətli {result.Patient?.FirstName}, sizə yeni resept təyin olundu."
+));
                 return ToDto(result!);
             }
             catch
