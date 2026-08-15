@@ -29,8 +29,15 @@ namespace ClinicManagementSystem.Controllers
             _context = context;
             _configuration = configuration;
         }
-       
+
+        /// <summary>
+        /// Yeni istifadəçi qeydiyyatı — ADMIN, DOCTOR və ya PATIENT rolu ilə.
+        /// DOCTOR/PATIENT rolları üçün mövcud DoctorId/PatientId göstərilməlidir.
+        /// </summary>
+        /// <param name="dto">Qeydiyyat məlumatları (email, şifrə, rol, DoctorId/PatientId)</param>
         [HttpPost("register")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             var validRoles = new[] { Roles.Admin, Roles.Doctor, Roles.Patient };
@@ -92,7 +99,13 @@ namespace ClinicManagementSystem.Controllers
             return Ok(new { message = "Qeydiyyat uğurludur." });
         
     }
+        /// <summary>
+        /// İstifadəçi girişi — email və şifrə ilə, uğurlu olduqda JWT token qaytarır.
+        /// </summary>
+        /// <param name="dto">Giriş məlumatları (email, şifrə)</param>
         [HttpPost("login")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
