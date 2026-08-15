@@ -484,4 +484,5 @@ $RECYCLE.BIN/
 # Local secrets - do not commit
 appsettings.Development.json
 C l i n i c M a n a g m e n t S y s t e m / U p l o a d s /  
+ a p p s e t t i n g s . D e v e l o p m e n t . j s o n  
  
